@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barka's Tech Corp | Web Dev & Tech Tutoring</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            dark: '#0B0F19',
+                            card: '#151C2C',
+                            primary: '#3B82F6', 
+                            secondary: '#8B5CF6', 
+                            accent: '#06B6D4'
+                        }
+                    },
+                    animation: {
+                        'blob': 'blob 7s infinite',
+                        'orbit-slow': 'spin 12s linear infinite',
+                        'orbit-fast': 'spin 8s linear reverse infinite',
+                        'shimmer': 'shimmer 4s linear infinite',
+                    },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        },
+                        shimmer: {
+                            '0%': { backgroundPosition: '-200% center' },
+                            '100%': { backgroundPosition: '200% center' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #0B0F19;
+            color: #F8FAFC;
+            overflow-x: hidden;
+        }
+        
+        .glass-nav {
+            background: rgba(11, 15, 25, 0.7);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .brand-logo-container {
+            position: relative;
+            width: 48px;
+            height: 48px;
+        }
+        
+        .orbit {
+            position: absolute;
+            inset: 0;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 50%;
+        }
+
+        .core-glow {
+            position: absolute;
+            inset: 14px;
+            background: radial-gradient(circle, #3B82F6 0%, #8B5CF6 100%);
+            border-radius: 4px;
+            transform: rotate(45deg);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.8);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .shimmer-text {
+            background: linear-gradient(90deg, #F8FAFC 0%, #3B82F6 25%, #8B5CF6 50%, #06B6D4 75%, #F8FAFC 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 6s linear infinite;
+        }
+
+        .acronym-letter {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 800;
+            background: linear-gradient(to bottom, #3B82F6, #8B5CF6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: rotate(45deg) scale(1); opacity: 1; }
+            50% { transform: rotate(45deg) scale(1.2); opacity: 0.7; }
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .card-reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease-out;
+        }
+
+        .card-reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Slider Styles */
+        .slider-container {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            border-radius: 2rem;
+            overflow: hidden;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 1s ease-in-out, transform 1s ease-in-out;
+            transform: scale(1.05);
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .slide-overlay {
+            background: linear-gradient(to top, rgba(11, 15, 25, 0.9) 0%, rgba(11, 15, 25, 0.2) 60%, transparent 100%);
+        }
+
+        .progress-bar-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: #3B82F6;
+            width: 0%;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Background decorative elements -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-[-1]">
+        <div class="absolute w-[500px] h-[500px] bg-brand-primary/10 rounded-full blur-[120px] -top-48 -left-48 animate-blob"></div>
+        <div class="absolute w-[500px] h-[500px] bg-brand-secondary/10 rounded-full blur-[120px] top-1/2 -right-48 animate-blob" style="animation-delay: 2s;"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass-nav">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex items-center gap-4 group cursor-pointer">
+                    <div class="brand-logo-container">
+                        <div class="orbit animate-orbit-slow"></div>
+                        <div class="core-glow"></div>
+                    </div>
+                    <div class="flex flex-col leading-none">
+                        <span class="font-display font-extrabold text-xl tracking-tight shimmer-text uppercase">
+                            Barka's Tech
+                        </span>
+                        <span class="text-[10px] tracking-[0.3em] font-bold text-brand-accent uppercase mt-1">
+                            Corp Systems
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="hidden md:flex space-x-8 items-center">
+                    <a href="#home" class="text-sm font-medium text-slate-400 hover:text-white transition-colors">Home</a>
+                    <a href="#activities" class="text-sm font-medium text-slate-400 hover:text-white transition-colors">Activities</a>
+                    <a href="#philosophy" class="text-sm font-medium text-slate-400 hover:text-white transition-colors">Philosophy</a>
+                    <a href="#about" class="text-sm font-medium text-slate-400 hover:text-white transition-colors">CEO</a>
+                    <a href="#services" class="text-sm font-medium text-slate-400 hover:text-white transition-colors">Services</a>
+                    <a href="#contact" class="px-6 py-2 rounded-full bg-brand-primary/20 border border-brand-primary/30 text-white text-sm font-semibold transition-all hover:bg-brand-primary/40">
+                        Start a Project
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="pt-48 pb-20 flex items-center relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
+            <div class="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-slate-800/40 border border-slate-700/50 mb-10">
+                <span class="w-2 h-2 rounded-full bg-brand-accent animate-pulse"></span>
+                <span class="text-xs font-bold tracking-widest uppercase text-slate-400">Since 2023 | Gombe, Nigeria</span>
+            </div>
+            
+            <h1 class="text-6xl md:text-8xl font-display font-extrabold tracking-tighter mb-8 leading-[0.9]">
+                Barka's Tech Corp<br/>
+                <span class="shimmer-text">Bringing Ideas to Reality.</span>
+            </h1>
+            
+            <p class="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto mb-12">
+                "Shaping tomorrow starting today" — Transforming visions into high-performance digital architectures through knowledge and action.
+            </p>
+            
+            <div class="flex flex-wrap justify-center gap-6">
+                <a href="#philosophy" class="px-10 py-4 bg-brand-primary rounded-xl font-bold text-white hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] transition-all">
+                    Our Mission
+                </a>
+                <a href="#contact" class="px-10 py-4 bg-transparent border border-slate-700 rounded-xl font-bold text-slate-300 hover:bg-slate-800 transition-all">
+                    Contact Us
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Activities Automatic Slider Section -->
+    <section id="activities" class="py-20 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-brand-primary font-bold tracking-[0.2em] uppercase text-sm mb-4">Live Activities</h2>
+                <h3 class="text-4xl md:text-5xl font-display font-bold">BTC in Action</h3>
+            </div>
+
+            <div class="slider-container border border-white/10 shadow-2xl">
+                <!-- Slide 1: Web Development -->
+                <div class="slide active">
+                    <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=1200" alt="Web Coding" class="w-full h-full object-cover">
+                    <div class="slide-overlay absolute inset-0 flex flex-col justify-end p-12">
+                        <span class="px-3 py-1 bg-brand-primary text-[10px] font-bold uppercase tracking-widest rounded w-fit mb-4">Realization</span>
+                        <h4 class="text-3xl md:text-4xl font-display font-bold mb-2">Architecting Modern Web Systems</h4>
+                        <p class="text-slate-300 max-w-xl">Witnessing the birth of complex digital platforms, built with precision and modern tech stacks.</p>
+                    </div>
+                </div>
+
+                <!-- Slide 2: Teaching -->
+                <div class="slide">
+                    <img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=1200" alt="Tech Tutoring" class="w-full h-full object-cover">
+                    <div class="slide-overlay absolute inset-0 flex flex-col justify-end p-12">
+                        <span class="px-3 py-1 bg-brand-secondary text-[10px] font-bold uppercase tracking-widest rounded w-fit mb-4">Knowledge</span>
+                        <h4 class="text-3xl md:text-4xl font-display font-bold mb-2">Empowering the Next Generation</h4>
+                        <p class="text-slate-300 max-w-xl">Active mentoring sessions where complex concepts are broken down into practical skills.</p>
+                    </div>
+                </div>
+
+                <!-- Slide 3: Strategy -->
+                <div class="slide">
+                    <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=1200" alt="Consulting" class="w-full h-full object-cover">
+                    <div class="slide-overlay absolute inset-0 flex flex-col justify-end p-12">
+                        <span class="px-3 py-1 bg-brand-accent text-[10px] font-bold uppercase tracking-widest rounded w-fit mb-4">Ambition</span>
+                        <h4 class="text-3xl md:text-4xl font-display font-bold mb-2">Strategic Tech Planning</h4>
+                        <p class="text-slate-300 max-w-xl">Consulting with ambitious visionaries to map out their digital roadmap to success.</p>
+                    </div>
+                </div>
+
+                <!-- Navigation Controls -->
+                <div class="absolute top-1/2 -translate-y-1/2 w-full flex justify-between px-6 z-20">
+                    <button onclick="prevSlide()" class="w-12 h-12 rounded-full bg-brand-dark/50 border border-white/10 flex items-center justify-center hover:bg-brand-primary transition-all">
+                        <i class="ph ph-caret-left text-white text-xl"></i>
+                    </button>
+                    <button onclick="nextSlide()" class="w-12 h-12 rounded-full bg-brand-dark/50 border border-white/10 flex items-center justify-center hover:bg-brand-primary transition-all">
+                        <i class="ph ph-caret-right text-white text-xl"></i>
+                    </button>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="progress-bar-container">
+                    <div id="slide-progress" class="progress-bar-fill"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Company Meaning Section (Acronyms) -->
+    <section id="philosophy" class="py-32 bg-brand-card/20 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-20">
+                <h2 class="text-brand-accent font-bold tracking-[0.2em] uppercase text-sm mb-4">The DNA of Our Name</h2>
+                <h3 class="text-4xl md:text-5xl font-display font-bold">What We Stand For</h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+                <!-- BARKA -->
+                <div class="p-8 bg-brand-dark rounded-3xl border border-white/5 card-reveal">
+                    <h4 class="text-3xl font-display font-bold mb-8 text-brand-primary border-b border-white/10 pb-4 tracking-widest">BARKA</h4>
+                    <ul class="space-y-4">
+                        <li class="flex items-baseline gap-3">
+                            <span class="acronym-letter text-2xl">B</span> <span class="text-slate-300 font-medium italic">ringing</span>
+                        </li>
+                        <li class="flex items-baseline gap-3">
+                            <span class="acronym-letter text-2xl">A</span> <span class="text-slate-300 font-medium italic">mbition to</span>
+                        </li>
+                        <li class="flex items-baseline gap-3">
+                            <span class="acronym-letter text-2xl">R</span> <span class="text-slate-300 font-medium italic">eality through</span>
+                        </li>
+                        <li class="flex items-baseline gap-3">
+                            <span class="acronym-letter text-2xl">K</span> <span class="text-slate-300 font-medium italic">nowledge and</span>
+                        </li>
+                        <li class="flex items-baseline gap-3">
+                            <span class="acronym-letter text-2xl">A</span> <span class="text-slate-300 font-medium italic">ction</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- TECH -->
+                <div class="p-8 bg-brand-dark rounded-3xl border border-white/5 card-reveal" style="transition-delay: 150ms;">
+                    <h4 class="text-3xl font-display font-bold mb-8 text-brand-secondary border-b border-white/10 pb-4 tracking-widest">TECH</h4>
+                    <ul class="space-y-4">
+                        <li class="flex items-baseline gap-3">
+                            <span class="acronym-letter text-2xl">T</span> <span class="text-slate-300 font-medium italic">eaching</span>
+                        </li>
+                        <li class="flex items-baseline gap-3">
+                            <span class="acronym-letter text-2xl">E</span> <span class="text-slate-300 font-medium italic">very</span>
+                        </li>
+                        <li class="flex items-baseline gap-3">
+                            <span class="acronym-letter text-2xl">C</span> <span class="text-slate-300 font-medium italic">hild to be</span>
+                        </li>
+                        <li class="flex items-baseline gap-3">
+                            <span class="acronym-letter text-2xl">H</span> <span class="text-slate-300 font-medium italic">andy</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- CORP -->
+                <div class="p-8 bg-brand-dark rounded-3xl border border-white/5 card-reveal" style="transition-delay: 300ms;">
+                    <h4 class="text-3xl font-display font-bold mb-8 text-brand-accent border-b border-white/10 pb-4 tracking-widest">CORP</h4>
+                    <ul class="space-y-4">
+                        <li class="flex items-baseline gap-3">
+                            <span class="acronym-letter text-2xl">C</span> <span class="text-slate-300 font-medium italic">reating</span>
+                        </li>
+                        <li class="flex items-baseline gap-3">
+                            <span class="acronym-letter text-2xl">O</span> <span class="text-slate-300 font-medium italic">pportunity while</span>
+                        </li>
+                        <li class="flex items-baseline gap-3">
+                            <span class="acronym-letter text-2xl">R</span> <span class="text-slate-300 font-medium italic">ealizing</span>
+                        </li>
+                        <li class="flex items-baseline gap-3">
+                            <span class="acronym-letter text-2xl">P</span> <span class="text-slate-300 font-medium italic">otential</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About the CEO Section -->
+    <section id="about" class="py-32 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <div class="relative card-reveal">
+                    <div class="absolute -inset-4 bg-gradient-to-tr from-brand-primary/20 to-brand-secondary/20 rounded-3xl blur-2xl"></div>
+                    <img src="CEO.jpg" alt="Barka David" class="relative rounded-3xl border border-white/10 w-full aspect-square object-cover">
+                    <div class="absolute bottom-8 right-8 bg-brand-dark/90 backdrop-blur-xl border border-white/10 p-6 rounded-2xl max-w-xs">
+                        <p class="text-sm italic text-slate-300">"Technology is not just about tools, it's about transforming lives and businesses."</p>
+                        <p class="mt-4 font-bold text-brand-primary">— Barka David</p>
+                    </div>
+                </div>
+                <div class="card-reveal" style="transition-delay: 200ms;">
+                    <h2 class="text-brand-primary font-bold tracking-[0.2em] uppercase text-sm mb-4">Leadership</h2>
+                    <h3 class="text-4xl md:text-5xl font-display font-bold mb-8">About Barka David</h3>
+                    <p class="text-slate-400 text-lg mb-6 leading-relaxed">
+                        As the Founder and CEO of Barka's Tech Corp, Barka David leads with a singular vision: to bridge the gap between ideas and reality. Based in Gombe, Nigeria, he has established a reputation for excellence in technical strategy and digital transformation.
+                    </p>
+                    <p class="text-slate-400 text-lg mb-8 leading-relaxed">
+                        Under his leadership, BTC focuses on empowering clients with the specific tools and knowledge they need to thrive in a competitive global market. "At BTC, we're committed to making that transformation possible for everyone."
+                    </p>
+                    <div class="flex gap-4">
+                        <div class="p-4 rounded-xl bg-slate-800/40 border border-slate-700">
+                            <span class="block text-2xl font-bold text-white">Founder</span>
+                            <span class="text-xs text-slate-500 uppercase tracking-widest">Barka's Tech Corp</span>
+                        </div>
+                        <div class="p-4 rounded-xl bg-slate-800/40 border border-slate-700">
+                            <span class="block text-2xl font-bold text-white">CEO</span>
+                            <span class="text-xs text-slate-500 uppercase tracking-widest">Executive Strategy</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section id="team" class="py-32 bg-brand-dark/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-20">
+                <h2 class="text-brand-secondary font-bold tracking-[0.2em] uppercase text-sm mb-4">The Experts</h2>
+                <h3 class="text-4xl md:text-5xl font-display font-bold">Our Engineering Team</h3>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Team Member 1 -->
+                <div class="group p-6 bg-brand-card rounded-3xl border border-white/5 hover:border-brand-primary/30 transition-all card-reveal">
+                    <div class="w-full aspect-square rounded-2xl bg-slate-800 mb-6 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400&auto=format&fit=crop" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500">
+                    </div>
+                    <h4 class="text-xl font-bold mb-1">Amina Yusuf</h4>
+                    <p class="text-brand-primary text-sm font-bold uppercase tracking-widest">Lead Web Developer</p>
+                </div>
+
+                <!-- Team Member 2 -->
+                <div class="group p-6 bg-brand-card rounded-3xl border border-white/5 hover:border-brand-secondary/30 transition-all card-reveal" style="transition-delay: 100ms;">
+                    <div class="w-full aspect-square rounded-2xl bg-slate-800 mb-6 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=400&auto=format&fit=crop" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500">
+                    </div>
+                    <h4 class="text-xl font-bold mb-1">James Okafor</h4>
+                    <p class="text-brand-secondary text-sm font-bold uppercase tracking-widest">Senior Tutor</p>
+                </div>
+
+                <!-- Team Member 3 -->
+                <div class="group p-6 bg-brand-card rounded-3xl border border-white/5 hover:border-brand-accent/30 transition-all card-reveal" style="transition-delay: 200ms;">
+                    <div class="w-full aspect-square rounded-2xl bg-slate-800 mb-6 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?q=80&w=400&auto=format&fit=crop" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500">
+                    </div>
+                    <h4 class="text-xl font-bold mb-1">Fatima Bello</h4>
+                    <p class="text-brand-accent text-sm font-bold uppercase tracking-widest">UX/UI Designer</p>
+                </div>
+
+                <!-- Team Member 4 -->
+                <div class="group p-6 bg-brand-card rounded-3xl border border-white/5 hover:border-white/20 transition-all card-reveal" style="transition-delay: 300ms;">
+                    <div class="w-full aspect-square rounded-2xl bg-slate-800 mb-6 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=400&auto=format&fit=crop" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500">
+                    </div>
+                    <h4 class="text-xl font-bold mb-1">Emeka Nwankwo</h4>
+                    <p class="text-slate-400 text-sm font-bold uppercase tracking-widest">Tech Consultant</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Grid -->
+    <section id="services" class="py-32">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="mb-20">
+                <h2 class="text-brand-primary font-bold tracking-[0.2em] uppercase text-sm mb-4">Capabilities</h2>
+                <h3 class="text-4xl md:text-5xl font-display font-bold">What We Offer</h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                <!-- Web Dev -->
+                <div class="group bg-brand-card p-4 rounded-3xl border border-white/5 hover:border-brand-primary/30 transition-all card-reveal">
+                    <div class="service-image-container mb-6 overflow-hidden rounded-2xl">
+                        <img src="https://images.unsplash.com/photo-1547658719-da2b51169166?q=80&w=800" alt="Web Development" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-4">
+                        <h4 class="text-2xl font-bold mb-4">Web Engineering</h4>
+                        <p class="text-slate-400">Responsive, user-friendly websites from simple brochure sites to complex enterprise applications.</p>
+                    </div>
+                </div>
+
+                <!-- Tutoring -->
+                <div class="group bg-brand-card p-4 rounded-3xl border border-white/5 hover:border-brand-secondary/30 transition-all card-reveal" style="transition-delay: 100ms;">
+                    <div class="service-image-container mb-6 overflow-hidden rounded-2xl">
+                        <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=800" alt="Tutoring" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-4">
+                        <h4 class="text-2xl font-bold mb-4">Tech Tutoring</h4>
+                        <p class="text-slate-400">Individual or group programming mentorship to help students and professionals bridge skill gaps.</p>
+                    </div>
+                </div>
+
+                <!-- Consulting -->
+                <div class="group bg-brand-card p-4 rounded-3xl border border-white/5 hover:border-brand-accent/30 transition-all card-reveal" style="transition-delay: 200ms;">
+                    <div class="service-image-container mb-6 overflow-hidden rounded-2xl">
+                        <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800" alt="Consulting" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-4">
+                        <h4 class="text-2xl font-bold mb-4">Tech Consulting</h4>
+                        <p class="text-slate-400">Expert advice on strategy, digital transformation, and IT solutions tailored for Nigerian business growth.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact & Footer -->
+    <section id="contact" class="py-32 relative border-t border-white/5 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-20">
+                <div>
+                    <h2 class="text-4xl md:text-5xl font-display font-bold mb-8">Let's Discuss Your Next Venture</h2>
+                    <p class="text-slate-400 text-lg mb-10">Have a project in mind or need tech advice? Reach out to us and let's discuss how we can help.</p>
+                    
+                    <div class="space-y-6">
+                        <div class="flex items-center gap-6 p-6 rounded-2xl bg-slate-800/40 border border-slate-700">
+                            <i class="ph ph-map-pin text-3xl text-brand-primary"></i>
+                            <div>
+                                <p class="text-sm font-bold text-slate-500 uppercase">Location</p>
+                                <p class="text-lg text-white font-medium">Gombe State, Nigeria</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-6 p-6 rounded-2xl bg-slate-800/40 border border-slate-700">
+                            <i class="ph ph-phone text-3xl text-brand-secondary"></i>
+                            <div>
+                                <p class="text-sm font-bold text-slate-500 uppercase">Direct Line</p>
+                                <p class="text-lg text-white font-medium">09035993955</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-6 p-6 rounded-2xl bg-slate-800/40 border border-slate-700">
+                            <i class="ph ph-envelope text-3xl text-brand-accent"></i>
+                            <div>
+                                <p class="text-sm font-bold text-slate-500 uppercase">Corporate Email</p>
+                                <p class="text-lg text-white font-medium">barkadavid360@gmail.com</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-brand-card p-8 rounded-3xl border border-white/10">
+                    <form class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-400 mb-2">Name</label>
+                                <input type="text" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all" placeholder="John Doe">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-400 mb-2">Email</label>
+                                <input type="email" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all" placeholder="john@example.com">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-400 mb-2">Service Interested In</label>
+                            <select class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-primary">
+                                <option>Web Development</option>
+                                <option>Tutoring</option>
+                                <option>Strategy Consulting</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-400 mb-2">Your Message</label>
+                            <textarea rows="4" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all" placeholder="Tell us about your project..."></textarea>
+                        </div>
+                        <button class="w-full py-4 bg-brand-primary rounded-xl font-bold text-white hover:bg-blue-600 transition-all uppercase tracking-widest text-sm">
+                            Transmit Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="py-20 border-t border-white/5 bg-brand-dark">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <div class="flex justify-center items-center gap-4 mb-8">
+                <span class="font-display font-bold text-2xl shimmer-text uppercase tracking-tighter">Barka's Tech Corp</span>
+            </div>
+            <p class="text-slate-400 max-w-md mx-auto mb-8">
+                "Bringing Ambition to Reality through Knowledge and Action"<br/>
+                Creating Opportunity while Realizing Potential.
+            </p>
+            <div class="flex justify-center gap-8 mb-10">
+                <a href="#" class="text-slate-500 hover:text-brand-primary transition-colors"><i class="ph ph-linkedin-logo text-3xl"></i></a>
+                <a href="#" class="text-slate-500 hover:text-brand-primary transition-colors"><i class="ph ph-twitter-logo text-3xl"></i></a>
+                <a href="#" class="text-slate-500 hover:text-brand-primary transition-colors"><i class="ph ph-instagram-logo text-3xl"></i></a>
+                <a href="#" class="text-slate-500 hover:text-brand-primary transition-colors"><i class="ph ph-facebook-logo text-3xl"></i></a>
+            </div>
+            <p class="text-slate-600 text-xs tracking-[0.3em] uppercase">&copy; 2023-2026 Barka's Tech Corp. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Reveal animation on scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.card-reveal').forEach(card => observer.observe(card));
+
+        // Automatic Slider Logic
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const progressBar = document.getElementById('slide-progress');
+        const slideInterval = 5000; // 5 seconds per slide
+        let startTimestamp;
+
+        function showSlide(index) {
+            slides.forEach(s => s.classList.remove('active'));
+            slides[index].classList.add('active');
+            resetProgressBar();
+        }
+
+        function nextSlide() {
+            currentSlide = (currentSlide + 1) % slides.length;
+            showSlide(currentSlide);
+        }
+
+        function prevSlide() {
+            currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+            showSlide(currentSlide);
+        }
+
+        function updateProgressBar(timestamp) {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const elapsed = timestamp - startTimestamp;
+            const progress = (elapsed % slideInterval) / slideInterval * 100;
+            progressBar.style.width = progress + '%';
+            
+            if (elapsed >= slideInterval) {
+                nextSlide();
+                startTimestamp = timestamp;
+            }
+            
+            requestAnimationFrame(updateProgressBar);
+        }
+
+        function resetProgressBar() {
+            startTimestamp = null;
+            progressBar.style.width = '0%';
+        }
+
+        // Initialize slider
+        requestAnimationFrame(updateProgressBar);
+    </script>
+</body>
+</html>
